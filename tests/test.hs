@@ -30,7 +30,7 @@ import Test.Framework.Providers.HUnit
 import Test.Framework.Providers.QuickCheck2
 import Test.QuickCheck
 
-import DifferentiableFunction
+import Function
 -- @-node:gcross.20091204093401.2950:<< Import needed modules >>
 -- @nl
 

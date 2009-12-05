@@ -1,5 +1,5 @@
 -- @+leo-ver=4-thin
--- @+node:gcross.20090727161338.1228:@thin DifferentiableFunction.hs
+-- @+node:gcross.20090727161338.1228:@thin Function.hs
 -- @@language Haskell
 
 -- @<< Language extensions >>
@@ -10,7 +10,7 @@
 -- @-node:gcross.20091204093401.2956:<< Language extensions >>
 -- @nl
 
-module DifferentiableFunction where
+module Function where
 
 -- @<< Import needed modules >>
 -- @+node:gcross.20091204093401.1597:<< Import needed modules >>
@@ -34,14 +34,14 @@ instance Projectable (Complex Double) () where
 -- @-node:gcross.20091204093401.2965:Projectable (Complex Double) ()
 -- @-node:gcross.20091204093401.2964:Instances
 -- @+node:gcross.20091204093401.1596:Types
--- @+node:gcross.20091204093401.1599:DifferentiableFunction
+-- @+node:gcross.20091204093401.1599:Function
 data Projectable domain index => Function domain index =
     Constant (Complex Double)
   | Projector index
   | (Function domain index) :+: (Function domain index)
   | (Function domain index) :*: (Function domain index)
   deriving (Eq,Show)
--- @-node:gcross.20091204093401.1599:DifferentiableFunction
+-- @-node:gcross.20091204093401.1599:Function
 -- @+node:gcross.20091204093401.2959:FunctionTransformer
 type FunctionTransformer domain index = Function domain index -> Function domain index 
 -- @nonl
@@ -75,5 +75,5 @@ d x (f :*: g) = (d x f :*: g) :+: (f :*: d x g)
 -- @-node:gcross.20091204093401.1605:d
 -- @-node:gcross.20091204093401.1601:Functions
 -- @-others
--- @-node:gcross.20090727161338.1228:@thin DifferentiableFunction.hs
+-- @-node:gcross.20090727161338.1228:@thin Function.hs
 -- @-leo
