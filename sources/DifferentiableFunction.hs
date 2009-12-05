@@ -36,13 +36,11 @@ instance Projectable (Complex Double) () where
 -- @+node:gcross.20091204093401.1596:Types
 -- @+node:gcross.20091204093401.1599:DifferentiableFunction
 data Projectable domain index => Function domain index =
-    Zero
-  | One
-  | Constant (Complex Double)
+    Constant (Complex Double)
   | Projector index
   | (Function domain index) :+: (Function domain index)
   | (Function domain index) :*: (Function domain index)
-  deriving (Eq)
+  deriving (Eq,Show)
 -- @-node:gcross.20091204093401.1599:DifferentiableFunction
 -- @+node:gcross.20091204093401.2959:FunctionTransformer
 type FunctionTransformer domain index = Function domain index -> Function domain index 
@@ -50,18 +48,6 @@ type FunctionTransformer domain index = Function domain index -> Function domain
 -- @-node:gcross.20091204093401.2959:FunctionTransformer
 -- @-node:gcross.20091204093401.1596:Types
 -- @+node:gcross.20091204093401.1601:Functions
--- @+node:gcross.20091204093401.2957:|+|
-Zero |+| g = g
-f |+| Zero = f
-f |+| g = f :+: f
--- @-node:gcross.20091204093401.2957:|+|
--- @+node:gcross.20091204093401.2958:|*|
-Zero |*| _ = Zero
-_ |*| Zero = Zero
-f |*| One = f
-One |*| g = g
-f |*| g = f :*: g
--- @-node:gcross.20091204093401.2958:|*|
 -- @+node:gcross.20091204093401.1603:p
 p :: Projectable domain index => index -> Function domain index
 p = Projector
@@ -70,27 +56,22 @@ p = Projector
 ($>) :: Projectable domain index =>
         Function domain index ->
         domain -> Complex Double
-($>) Zero = const 0
-($>) One = const 1
 ($>) (Constant value) = const value
 ($>) (Projector index) = project index
 ($>) (f :+: g) = (f $>) <^(+)^> (g $>)
-($>) (Zero :*: _) = const 0
-($>) (_ :*: Zero) = const 0
 ($>) (f :*: g) = (f $>) <^(*)^> (g $>)
 -- @-node:gcross.20091204093401.1602:($>)
 -- @+node:gcross.20091204093401.1604:m
 m :: Projectable domain index => index -> FunctionTransformer domain index
-m = (|*|) . Projector
+m = (:*:) . Projector
 -- @-node:gcross.20091204093401.1604:m
 -- @+node:gcross.20091204093401.1605:d
-d x Zero = Zero
-d x (Constant value) = Zero
+d _ (Constant value) = Constant 0
 d x (Projector y)
-    | y == x    = One
-    | otherwise = Zero
-d x (f :+: g) = (d x f) |+| (d x g)
-d x (f :*: g) = (d x f |*| g) |+| (f |*| d x g)
+    | y == x    = Constant 1
+    | otherwise = Constant 0
+d x (f :+: g) = (d x f) :+: (d x g)
+d x (f :*: g) = (d x f :*: g) :+: (f :*: d x g)
 -- @-node:gcross.20091204093401.1605:d
 -- @-node:gcross.20091204093401.1601:Functions
 -- @-others

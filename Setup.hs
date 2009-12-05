@@ -25,6 +25,7 @@ main = defaultMain [("","sources")]
                     ,"test-framework == 0.2.*"
                     ,"test-framework-hunit == 0.2.*"
                     ,"test-framework-quickcheck2 == 0.2.*"
+                    ,"random == 1.*"
                     ]
                    ))
 -- @-node:gcross.20091204093401.2938:main
