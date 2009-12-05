@@ -13,6 +13,7 @@
 <v t="gcross.20091204093401.2930"><vh>@thin QuantumEquationChecker.cabal</vh></v>
 <v t="gcross.20091204093401.2935"><vh>@thin Setup.hs</vh></v>
 <v t="gcross.20091204093401.1606"><vh>@path sources</vh>
+<v t="gcross.20091204093401.3427"><vh>@thin Euclidean3D.hs</vh></v>
 <v t="gcross.20090727161338.1228"><vh>@thin Function.hs</vh></v>
 </v>
 <v t="gcross.20091204093401.2939"><vh>@path tests</vh>
@@ -20,7 +21,7 @@
 </v>
 </vnodes>
 <tnodes>
-<t tx="gcross.20090727161338.1229" str_leo_pos="3"></t>
+<t tx="gcross.20090727161338.1229" str_leo_pos="4"></t>
 <t tx="gcross.20091204093401.1606"></t>
 <t tx="gcross.20091204093401.2939"></t>
 </tnodes>

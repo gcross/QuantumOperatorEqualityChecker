@@ -30,6 +30,7 @@ import Test.Framework.Providers.HUnit
 import Test.Framework.Providers.QuickCheck2
 import Test.QuickCheck
 
+import Euclidean3D
 import Function
 -- @-node:gcross.20091204093401.2950:<< Import needed modules >>
 -- @nl
@@ -52,6 +53,31 @@ instance Arbitrary (Complex Double) where
     arbitrary = liftM2 (:+) arbitrary arbitrary
 -- @-node:gcross.20091204093401.2972:Complex Double
 -- @+node:gcross.20091204093401.3406:Function
+-- @+at
+--  instance (Bounded index,
+--            Random index,
+--            Projectable domain index,
+--            Arbitrary domain)
+--      => Arbitrary (Function domain index)
+--    where
+--      arbitrary = sized $ \size ->
+--          case size of
+--              0 -> return (Constant 0)
+--              1 -> oneof
+--                  [fmap Constant arbitrary
+--                  ,fmap Projector (choose (minBound,maxBound))
+--                  ]
+--              _ -> do
+--                  left_size <- choose (0,size)
+--                  let right_size = size - left_size
+--                  constructor <- elements [(:+:),(:*:)]
+--                  liftM2 constructor
+--                         (resize left_size arbitrary)
+--                         (resize right_size arbitrary)
+-- @-at
+-- @@c
+-- @-node:gcross.20091204093401.3406:Function
+-- @+node:gcross.20091204093401.3501:Function
 instance (Bounded index,
           Random index,
           Projectable domain index,
@@ -59,56 +85,42 @@ instance (Bounded index,
     => Arbitrary (Function domain index)
   where
     arbitrary = sized $ \size ->
-        case size of
-            0 -> return (Constant 0)
-            1 -> oneof
+        if size <= 1 
+            then oneof
                 [fmap Constant arbitrary
                 ,fmap Projector (choose (minBound,maxBound))
                 ]
-            _ -> do
-                left_size <- choose (0,size)
-                let right_size = size - left_size
-                constructor <- elements [(:+:),(:*:)]
-                liftM2 constructor
-                       (resize left_size arbitrary)
-                       (resize right_size arbitrary)
+            else elements [(:+:),(:*:)]
+                 >>= \constructor -> 
+                    liftM2 constructor 
+                       (resize (size `div` 2) arbitrary)
+                       (resize (size `div` 2) arbitrary)
 
--- @-node:gcross.20091204093401.3406:Function
+-- @-node:gcross.20091204093401.3501:Function
 -- @-node:gcross.20091204093401.2971:Generators
--- @+node:gcross.20091204093401.3422:Types
--- @+node:gcross.20091204093401.3423:XYZ
-data XYZ = X | Y | Z deriving (Eq,Show,Enum,Bounded)
--- @-node:gcross.20091204093401.3423:XYZ
--- @-node:gcross.20091204093401.3422:Types
--- @+node:gcross.20091204093401.3409:Instances
--- @+node:gcross.20091204093401.3408:Random ()
-instance Random () where
-    randomR _ g = ((),g)
-    random g = ((),g)
--- @-node:gcross.20091204093401.3408:Random ()
--- @+node:gcross.20091204093401.3424:Random XYZ
+-- @+node:gcross.20091204093401.3480:Instances
+-- @+node:gcross.20091204093401.3482:Arbitrary XYZ
+instance Arbitrary XYZ where
+    arbitrary = elements [X,Y,Z]
+-- @-node:gcross.20091204093401.3482:Arbitrary XYZ
+-- @+node:gcross.20091204093401.3484:Random XYZ
 instance Random XYZ where
     randomR (lo,hi) = first toEnum . randomR (fromEnum lo,fromEnum hi)
     random = randomR (X,Z)
--- @-node:gcross.20091204093401.3424:Random XYZ
--- @+node:gcross.20091204093401.3425:Arbitrary XYZ
-instance Arbitrary XYZ where
-    arbitrary = elements [X,Y,Z]
--- @-node:gcross.20091204093401.3425:Arbitrary XYZ
--- @+node:gcross.20091204093401.3421:Projectable (,,) XYZ
-instance Projectable (Complex Double,Complex Double,Complex Double) XYZ where
-    project X (value,_,_) = value
-    project Y (_,value,_) = value
-    project Z (_,_,value) = value
--- @-node:gcross.20091204093401.3421:Projectable (,,) XYZ
--- @-node:gcross.20091204093401.3409:Instances
+-- @-node:gcross.20091204093401.3484:Random XYZ
+-- @+node:gcross.20091204093401.3487:Random ()
+instance Random () where
+    randomR _ g = ((),g)
+    random g = ((),g)
+-- @-node:gcross.20091204093401.3487:Random ()
+-- @-node:gcross.20091204093401.3480:Instances
 -- @+node:gcross.20091204093401.3387:Classes
 -- @+node:gcross.20091204093401.3388:AlmostEq
 class AlmostEq a where
     (~=) :: a -> a -> Bool
 
 instance AlmostEq Double where
-    x ~= y = abs (x-y) < 1e-7
+    x ~= y = abs (x-y) / (abs (x+y) + 1e-100) < 1e-7
 
 instance (AlmostEq a) => AlmostEq [a] where
     x ~= y = all (uncurry (~=)) $ zip x y
@@ -145,8 +157,33 @@ main = defaultMain
     -- @    << Tests >>
     -- @+node:gcross.20091204093401.2953:<< Tests >>
     -- @+others
-    -- @+node:gcross.20091204093401.2954:DifferentiableFunction
-    [testGroup "DifferentiableFunction"
+    -- @+node:gcross.20091204093401.3509:Euclidean3D
+    [testGroup "Euclidean3D"
+        -- @    @+others
+        -- @+node:gcross.20091204093401.3514:Commutation relations
+        ,testGroup "Commutation relations"
+            -- @    @+others
+            -- @+node:gcross.20091204093401.3515:[r_i,r_j] == 0
+            [testProperty "[r_i,r_j] == 0" $
+                \i j f v@(x,y,z) -> ((r_ i . r_ j) f $> v) ~= ((r_ j . r_ i) f $> v)
+            -- @-node:gcross.20091204093401.3515:[r_i,r_j] == 0
+            -- @+node:gcross.20091204093401.3516:[p_i,p_j] == 0
+            ,testProperty "[p_i,p_j] == 0" $
+                \i j f v@(x,y,z) -> ((p_ i . p_ j) f $> v) ~= ((p_ j . p_ i) f $> v)
+            -- @-node:gcross.20091204093401.3516:[p_i,p_j] == 0
+            -- @+node:gcross.20091204093401.3517:[r_i,p_j] == 0
+            ,testProperty "[r_j,p_j] == i" $
+                \j f v@(x,y,z) -> ((r_ j ~~ p_ j) f $> v) ~= (i * f $> v)
+            -- @nonl
+            -- @-node:gcross.20091204093401.3517:[r_i,p_j] == 0
+            -- @-others
+            ]
+        -- @-node:gcross.20091204093401.3514:Commutation relations
+        -- @-others
+        ]
+    -- @-node:gcross.20091204093401.3509:Euclidean3D
+    -- @+node:gcross.20091204093401.2954:Function
+    [testGroup "Function"
         -- @    @+others
         -- @+node:gcross.20091204093401.2955:($>)
         [testGroup "($>)"
@@ -216,7 +253,7 @@ main = defaultMain
         -- @-node:gcross.20091204093401.3399:d
         -- @-others
         ]
-    -- @-node:gcross.20091204093401.2954:DifferentiableFunction
+    -- @-node:gcross.20091204093401.2954:Function
     -- @-others
     -- @-node:gcross.20091204093401.2953:<< Tests >>
     -- @nl
