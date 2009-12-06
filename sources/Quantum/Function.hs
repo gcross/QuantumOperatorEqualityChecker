@@ -10,7 +10,7 @@
 -- @-node:gcross.20091204093401.2956:<< Language extensions >>
 -- @nl
 
-module Function where
+module Quantum.Function where
 
 -- @<< Import needed modules >>
 -- @+node:gcross.20091204093401.1597:<< Import needed modules >>
@@ -41,6 +41,8 @@ instance Projectable (Complex Double) () where
 -- @-node:gcross.20091204093401.2964:Instances
 -- @+node:gcross.20091204093401.1596:Types
 -- @+node:gcross.20091204093401.1599:Function
+infixl 7 :*:
+infixl 6 :+:, :-:
 data Projectable domain index => Function domain index =
     Constant (Complex Double)
   | Projector index
@@ -49,13 +51,11 @@ data Projectable domain index => Function domain index =
   | (Function domain index) :*: (Function domain index)
   deriving (Eq,Show)
 -- @-node:gcross.20091204093401.1599:Function
--- @+node:gcross.20091204093401.2959:FunctionTransformer
-type FunctionTransformer domain index = Function domain index -> Function domain index 
--- @nonl
--- @-node:gcross.20091204093401.2959:FunctionTransformer
 -- @-node:gcross.20091204093401.1596:Types
--- @+node:gcross.20091204093401.1601:Functions
--- @+node:gcross.20091204093401.1602:($>)
+-- @+node:gcross.20091204093401.3576:Functions
+-- @+node:gcross.20091204093401.3578:($>)
+infixl 5 $>
+
 ($>) :: Projectable domain index =>
         Function domain index ->
         domain -> Complex Double
@@ -64,34 +64,8 @@ type FunctionTransformer domain index = Function domain index -> Function domain
 ($>) (f :+: g) = (f $>) <^(+)^> (g $>)
 ($>) (f :-: g) = (f $>) <^(-)^> (g $>)
 ($>) (f :*: g) = (f $>) <^(*)^> (g $>)
--- @-node:gcross.20091204093401.1602:($>)
--- @+node:gcross.20091204093401.3508:c
-c :: Projectable domain index =>
-     Complex Double ->
-     FunctionTransformer domain index
-c = (:*:) . Constant
--- @-node:gcross.20091204093401.3508:c
--- @+node:gcross.20091204093401.1604:m
-m :: Projectable domain index => index -> FunctionTransformer domain index
-m = (:*:) . Projector
--- @-node:gcross.20091204093401.1604:m
--- @+node:gcross.20091204093401.1605:d
-d _ (Constant value) = Constant 0
-d x (Projector y)
-    | y == x    = Constant 1
-    | otherwise = Constant 0
-d x (f :+: g) = (d x f) :+: (d x g)
-d x (f :-: g) = (d x f) :-: (d x g)
-d x (f :*: g) = (d x f :*: g) :+: (f :*: d x g)
--- @-node:gcross.20091204093401.1605:d
--- @+node:gcross.20091204093401.3489:][
-(~~) :: Projectable domain index =>
-        FunctionTransformer domain index ->
-        FunctionTransformer domain index ->
-        FunctionTransformer domain index
-x ~~ y = (x.y) <^(:-:)^> (y.x)
--- @-node:gcross.20091204093401.3489:][
--- @-node:gcross.20091204093401.1601:Functions
+-- @-node:gcross.20091204093401.3578:($>)
+-- @-node:gcross.20091204093401.3576:Functions
 -- @-others
 -- @-node:gcross.20090727161338.1228:@thin Function.hs
 -- @-leo

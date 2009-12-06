@@ -11,13 +11,14 @@
 -- @-node:gcross.20091204093401.3471:<< Language extensions >>
 -- @nl
 
-module Euclidean3D where
+module Quantum.Euclidean3D where
 
 -- @<< Import needed modules >>
 -- @+node:gcross.20091204093401.3472:<< Import needed modules >>
 import Data.Complex
 
-import Function
+import Quantum.Function
+import Quantum.Function.Transformers
 -- @-node:gcross.20091204093401.3472:<< Import needed modules >>
 -- @nl
 
@@ -47,10 +48,11 @@ r_ x = (Projector x :*:)
 r_x = r_ X
 r_y = r_ Y
 r_z = r_ Z
+
 -- @-node:gcross.20091204093401.3478:r_
 -- @+node:gcross.20091204093401.3479:p_
 p_ :: XYZ -> FunctionTransformer ThreeDimensions XYZ
-p_ j = c(-i) . d j
+p_ j = (-i) *| d j
 
 p_x = p_ X
 p_y = p_ Y
