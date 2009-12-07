@@ -61,6 +61,8 @@ d x (Projector y)
 d x (f :+: g) = d x f :+: d x g
 d x (f :-: g) = d x f :-: d x g
 d x (f :*: g) = (d x f :*: g) :+: (f :*: d x g)
+d x (f :/: g) = (d x f :/: g) :-: (f :/: (d x g :*: d x g))
+d x (Sqrt f) = (Constant (1/2)) :*: d x f :/: (Sqrt f)
 d x (Sin f) = Cos f :*: d x f
 d x (Cos f) = (Constant (-1)) :*: Sin f :*: d x f
 -- @-node:gcross.20091204093401.3574:d

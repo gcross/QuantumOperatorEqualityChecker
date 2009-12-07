@@ -99,7 +99,8 @@ instance (Floating result
         if size <= 1 
             then oneof
                 [fmap Constant arbitrary
-                ,fmap Projector (choose (minBound,maxBound))
+                ,elements [Sin,Cos,id] >>= \constructor ->
+                    fmap (constructor . Projector) (choose (minBound,maxBound))
                 ]
             else oneof
                 [elements [(:+:),(:-:),(:*:)]
@@ -107,10 +108,6 @@ instance (Floating result
                         liftM2 constructor 
                             (resize (size `div` 2) arbitrary)
                             (resize (size `div` 2) arbitrary)
-                ,elements [Sin,Cos]
-                    >>= \constructor ->
-                        liftM constructor 
-                            (resize (size*2 `div` 3) arbitrary)
                 ]
 -- @-node:gcross.20091204093401.3617:Function
 -- @-node:gcross.20091204093401.3615:Generators

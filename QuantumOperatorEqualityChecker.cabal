@@ -1,0 +1,17 @@
+-- @+leo-ver=4-thin
+-- @+node:gcross.20091204093401.2930:@thin QuantumOperatorEqualityChecker.cabal
+-- @@language Haskell
+Name:           QuantumOperatorEqualityChecker
+Version:        0.1
+Cabal-Version:  >= 1.6
+Build-Type:     Custom
+
+Library
+    Build-Depends:  base == 4.1.*,
+                    Blueprint >= 0.2,
+                    InfixApplicative == 1.*,
+                    random == 1.*,
+                    QuickCheck == 2.*,
+                    HUnit == 1.*
+-- @-node:gcross.20091204093401.2930:@thin QuantumOperatorEqualityChecker.cabal
+-- @-leo

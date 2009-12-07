@@ -38,12 +38,16 @@ data XYZ = X | Y | Z deriving (Eq,Show,Enum,Bounded)
 -- @+node:gcross.20091206113753.1497:ThreeDimensions
 type ThreeDimensions result = (result,result,result)
 -- @-node:gcross.20091206113753.1497:ThreeDimensions
+-- @+node:gcross.20091206192830.1384:QuantumOperator
+type QuantumOperator = FunctionTransformer (ThreeDimensions (Complex Double)) XYZ (Complex Double)
+-- @-node:gcross.20091206192830.1384:QuantumOperator
 -- @-node:gcross.20091204093401.3475:Types
 -- @+node:gcross.20091204093401.3477:Operators
 -- @+node:gcross.20091204093401.3478:r_
 r_ :: Floating result => XYZ -> FunctionTransformer (ThreeDimensions result) XYZ result
 r_ x = (Projector x :*:)
 
+r_x,r_y,r_z :: QuantumOperator
 r_x = r_ X
 r_y = r_ Y
 r_z = r_ Z
@@ -54,6 +58,7 @@ p_ :: (Floating a, RealFloat a) =>
       XYZ -> FunctionTransformer (ThreeDimensions (Complex a)) XYZ (Complex a)
 p_ j = (-i) *| d j
 
+p_x,p_y,p_z :: QuantumOperator
 p_x = p_ X
 p_y = p_ Y
 p_z = p_ Z

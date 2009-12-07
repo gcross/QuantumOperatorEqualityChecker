@@ -41,7 +41,7 @@ instance Projectable a () a where
 -- @-node:gcross.20091204093401.2964:Instances
 -- @+node:gcross.20091204093401.1596:Types
 -- @+node:gcross.20091204093401.1599:Function
-infixl 7 :*:
+infixl 7 :*:, :/:
 infixl 6 :+:, :-:
 data (Floating result, Projectable domain index result) =>
      Function domain index result =
@@ -50,6 +50,8 @@ data (Floating result, Projectable domain index result) =>
   | (Function domain index result) :+: (Function domain index result)
   | (Function domain index result) :-: (Function domain index result)
   | (Function domain index result) :*: (Function domain index result)
+  | (Function domain index result) :/: (Function domain index result)
+  | Sqrt (Function domain index result)
   | Sin (Function domain index result)
   | Cos (Function domain index result)
   deriving (Eq,Show)
@@ -67,6 +69,8 @@ infixl 5 $>
 ($>) (f :+: g) = (f $>) <^(+)^> (g $>)
 ($>) (f :-: g) = (f $>) <^(-)^> (g $>)
 ($>) (f :*: g) = (f $>) <^(*)^> (g $>)
+($>) (f :/: g) = (f $>) <^(/)^> (g $>)
+($>) (Sqrt f) = sqrt . (f $>)
 ($>) (Sin f) = sin . (f $>)
 ($>) (Cos f) = cos . (f $>)
 -- @-node:gcross.20091204093401.3578:($>)
