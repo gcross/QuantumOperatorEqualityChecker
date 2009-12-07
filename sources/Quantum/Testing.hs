@@ -6,7 +6,7 @@
 -- @+node:gcross.20091204093401.3599:<< Language extensions >>
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
--- @nonl
+{-# LANGUAGE UndecidableInstances #-}
 -- @-node:gcross.20091204093401.3599:<< Language extensions >>
 -- @nl
 
@@ -14,6 +14,7 @@ module Quantum.Testing where
 
 -- @<< Import needed modules >>
 -- @+node:gcross.20091204093401.3600:<< Import needed modules >>
+import Control.Applicative.Infix
 import Control.Arrow
 import Control.Monad
 
@@ -40,7 +41,7 @@ class AlmostEq a where
     (~=) :: a -> a -> Bool
 
 instance AlmostEq Double where
-    x ~= y = abs (x-y) / (abs (x+y) + 1e-100) < 1e-7
+    x ~= y = min (abs (x-y)) (abs (x-y) / (abs (x+y) + 1e-100)) < 1e-7
 
 instance (AlmostEq a) => AlmostEq [a] where
     x ~= y = all (uncurry (~=)) $ zip x y
@@ -52,10 +53,6 @@ x /~ y = not (x ~= y)
 -- @-node:gcross.20091204093401.3629:AlmostEq
 -- @-node:gcross.20091204093401.3628:Classes
 -- @+node:gcross.20091204093401.3622:Instances
--- @+node:gcross.20091204093401.3623:Arbitrary XYZ
-instance Arbitrary XYZ where
-    arbitrary = elements [X,Y,Z]
--- @-node:gcross.20091204093401.3623:Arbitrary XYZ
 -- @+node:gcross.20091204093401.3624:Random XYZ
 instance Random XYZ where
     randomR (lo,hi) = first toEnum . randomR (fromEnum lo,fromEnum hi)
@@ -66,7 +63,7 @@ instance Random () where
     randomR _ g = ((),g)
     random g = ((),g)
 -- @-node:gcross.20091204093401.3625:Random ()
--- @+node:gcross.20091204093401.3655:Random (Complex Double)
+-- @+node:gcross.20091204093401.3655:Random (Complex a)
 instance (Random a, RealFloat a) => Random (Complex a) where
     randomR (lo_r :+ lo_i,hi_r :+ hi_i) g0 =
         let (r,g1) = randomR (lo_r,hi_r) g0
@@ -76,19 +73,27 @@ instance (Random a, RealFloat a) => Random (Complex a) where
         let (r,g1) = random g0
             (i,g2) = random g1
         in (r :+ i,g2)
--- @-node:gcross.20091204093401.3655:Random (Complex Double)
+-- @-node:gcross.20091204093401.3655:Random (Complex a)
 -- @-node:gcross.20091204093401.3622:Instances
 -- @+node:gcross.20091204093401.3615:Generators
+-- @+node:gcross.20091206183506.1344:XYZ
+instance Arbitrary XYZ where
+    arbitrary = elements [X,Y,Z]
+-- @-node:gcross.20091206183506.1344:XYZ
 -- @+node:gcross.20091204093401.3616:Complex Double
-instance Arbitrary (Complex Double) where
-    arbitrary = liftM2 (:+) arbitrary arbitrary
+instance (Arbitrary a, RealFloat a) => Arbitrary (Complex a) where
+    arbitrary = liftM (:+ 0) arbitrary
 -- @-node:gcross.20091204093401.3616:Complex Double
 -- @+node:gcross.20091204093401.3617:Function
-instance (Bounded index,
-          Random index,
-          Projectable domain index,
-          Arbitrary domain)
-    => Arbitrary (Function domain index)
+instance (Floating result
+         ,Bounded index
+         ,Random result
+         ,Random index
+         ,Projectable domain index result
+         ,Arbitrary domain
+         ,Arbitrary result
+         )
+    => Arbitrary (Function domain index result)
   where
     arbitrary = sized $ \size ->
         if size <= 1 
@@ -96,12 +101,17 @@ instance (Bounded index,
                 [fmap Constant arbitrary
                 ,fmap Projector (choose (minBound,maxBound))
                 ]
-            else elements [(:+:),(:*:)]
-                 >>= \constructor -> 
-                    liftM2 constructor 
-                       (resize (size `div` 2) arbitrary)
-                       (resize (size `div` 2) arbitrary)
-
+            else oneof
+                [elements [(:+:),(:-:),(:*:)]
+                    >>= \constructor ->
+                        liftM2 constructor 
+                            (resize (size `div` 2) arbitrary)
+                            (resize (size `div` 2) arbitrary)
+                ,elements [Sin,Cos]
+                    >>= \constructor ->
+                        liftM constructor 
+                            (resize (size*2 `div` 3) arbitrary)
+                ]
 -- @-node:gcross.20091204093401.3617:Function
 -- @-node:gcross.20091204093401.3615:Generators
 -- @+node:gcross.20091204093401.3633:Functions

@@ -23,25 +23,26 @@ import Quantum.Function
 -- @+others
 -- @+node:gcross.20091204093401.3579:Types
 -- @+node:gcross.20091204093401.3581:FunctionTransformer
-type FunctionTransformer domain index = Function domain index -> Function domain index 
--- @nonl
+type FunctionTransformer domain index a =
+        Function domain index a ->
+        Function domain index a 
 -- @-node:gcross.20091204093401.3581:FunctionTransformer
 -- @-node:gcross.20091204093401.3579:Types
 -- @+node:gcross.20091204093401.3571:Functions
 -- @+node:gcross.20091204093401.3573:*|
 infixl 7 *|
-(*|) :: Projectable domain index =>
-     Complex Double ->
-     FunctionTransformer domain index ->
-     FunctionTransformer domain index
+(*|) :: (Floating a, Projectable domain index a) =>
+     a ->
+     FunctionTransformer domain index a ->
+     FunctionTransformer domain index a
 (*|) value transformer f = ((Constant value) :*: (transformer f))
 -- @-node:gcross.20091204093401.3573:*|
 -- @+node:gcross.20091206113753.1372:|^
 infixl 8 |^
-(|^) :: Projectable domain index =>
-     FunctionTransformer domain index ->
+(|^) :: (Floating a, Projectable domain index a) =>
+     FunctionTransformer domain index a ->
      Int ->
-     FunctionTransformer domain index
+     FunctionTransformer domain index a
 (|^) transformer exponent
   | exponent < 0
     = error "Negative exponents not presently supported."
@@ -53,36 +54,38 @@ infixl 8 |^
     = transformer . transformer|^(exponent-1)
 -- @-node:gcross.20091206113753.1372:|^
 -- @+node:gcross.20091204093401.3574:d
-d _ (Constant value) = Constant 0
+d _ (Constant value) = Constant (fromIntegral 0)
 d x (Projector y)
-    | y == x    = Constant 1
-    | otherwise = Constant 0
+    | y == x    = Constant (fromIntegral 1)
+    | otherwise = Constant (fromIntegral 0)
 d x (f :+: g) = d x f :+: d x g
 d x (f :-: g) = d x f :-: d x g
 d x (f :*: g) = (d x f :*: g) :+: (f :*: d x g)
+d x (Sin f) = Cos f :*: d x f
+d x (Cos f) = (Constant (-1)) :*: Sin f :*: d x f
 -- @-node:gcross.20091204093401.3574:d
 -- @+node:gcross.20091204093401.3575:~~
 infixl 6 ~~
-(~~) :: Projectable domain index =>
-        FunctionTransformer domain index ->
-        FunctionTransformer domain index ->
-        FunctionTransformer domain index
+(~~) :: (Floating a, Projectable domain index a) =>
+        FunctionTransformer domain index a ->
+        FunctionTransformer domain index a ->
+        FunctionTransformer domain index a
 x ~~ y = x.y |-| y.x
 -- @-node:gcross.20091204093401.3575:~~
 -- @+node:gcross.20091204093401.3588:|+|
 infixl 6 |+|
-(|+|) :: Projectable domain index =>
-         FunctionTransformer domain index ->
-         FunctionTransformer domain index ->
-         FunctionTransformer domain index
+(|+|) :: (Floating a, Projectable domain index a) =>
+         FunctionTransformer domain index a ->
+         FunctionTransformer domain index a ->
+         FunctionTransformer domain index a
 (|+|) = liftA2 (:+:)
 -- @-node:gcross.20091204093401.3588:|+|
 -- @+node:gcross.20091204093401.3591:|-|
 infixl 6 |-|
-(|-|) :: Projectable domain index =>
-         FunctionTransformer domain index ->
-         FunctionTransformer domain index ->
-         FunctionTransformer domain index
+(|-|) :: (Floating a, Projectable domain index a) =>
+         FunctionTransformer domain index a ->
+         FunctionTransformer domain index a ->
+         FunctionTransformer domain index a
 (|-|) = liftA2 (:-:)
 -- @-node:gcross.20091204093401.3591:|-|
 -- @-node:gcross.20091204093401.3571:Functions

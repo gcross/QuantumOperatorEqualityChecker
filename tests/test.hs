@@ -32,24 +32,22 @@ import Quantum.Testing
 -- @+others
 -- @+node:gcross.20091204093401.3645:Helpers
 -- @+node:gcross.20091204093401.3646:simple
-simple :: Projectable (Complex Double) () => FunctionTransformer (Complex Double) ()
+simple :: Projectable (Complex Double) () (Complex Double) =>
+          FunctionTransformer (Complex Double) () (Complex Double)
 simple = id
 -- @-node:gcross.20091204093401.3646:simple
 -- @+node:gcross.20091204093401.3647:_3d
-_3d :: Projectable (Complex Double,Complex Double,Complex Double) XYZ =>
-       FunctionTransformer (Complex Double,Complex Double,Complex Double) XYZ
+_3d :: Projectable (ThreeDimensions (Complex Double)) XYZ (Complex Double) =>
+       FunctionTransformer (ThreeDimensions (Complex Double)) XYZ (Complex Double)
 _3d = id
 -- @-node:gcross.20091204093401.3647:_3d
+-- @+node:gcross.20091206113753.1499:_3dt
+_3dt :: Projectable (ThreeDimensions (Complex Double)) XYZ (Complex Double) =>
+       FunctionTransformer (ThreeDimensions (Complex Double)) XYZ (Complex Double) ->
+       FunctionTransformer (ThreeDimensions (Complex Double)) XYZ (Complex Double)
+_3dt = id
+-- @-node:gcross.20091206113753.1499:_3dt
 -- @-node:gcross.20091204093401.3645:Helpers
--- @+node:gcross.20091204093401.2962:Types
--- @+node:gcross.20091204093401.2963:TF
-type TF = Function (Complex Double) ()
--- @-node:gcross.20091204093401.2963:TF
--- @+node:gcross.20091204093401.2977:CFn
-type CFn = Complex Double -> Complex Double
--- @nonl
--- @-node:gcross.20091204093401.2977:CFn
--- @-node:gcross.20091204093401.2962:Types
 -- @-others
 
 main = defaultMain
@@ -142,15 +140,15 @@ main = defaultMain
             -- @    @+others
             -- @+node:gcross.20091204093401.3515:[r_i,r_j] == 0
             [testProperty "[r_i,r_j] == 0" $
-                \i j f v@(x,y,z) -> (r_ i . r_ j) f $> v ~= (r_ j . r_ i) f $> v
+                \i j f v@(x,y,z) -> _3dt (r_ i . r_ j) f $> v ~= (r_ j . r_ i) f $> v
             -- @-node:gcross.20091204093401.3515:[r_i,r_j] == 0
             -- @+node:gcross.20091204093401.3516:[p_i,p_j] == 0
             ,testProperty "[p_i,p_j] == 0" $
-                \i j f v@(x,y,z) -> (p_ i . p_ j) f $> v ~= (p_ j . p_ i) f $> v
+                \i j f v@(x,y,z) -> _3dt (p_ i . p_ j) f $> v ~= (p_ j . p_ i) f $> v
             -- @-node:gcross.20091204093401.3516:[p_i,p_j] == 0
             -- @+node:gcross.20091204093401.3517:[r_i,p_j] == 0
             ,testProperty "[r_j,p_j] == i" $
-                \j f v@(x,y,z) -> (r_ j ~~ p_ j) f $> v ~= (i *| id) f $> v
+                \j f v@(x,y,z) -> _3dt (r_ j ~~ p_ j) f $> v ~= (i *| id) f $> v
             -- @-node:gcross.20091204093401.3517:[r_i,p_j] == 0
             -- @-others
             ]

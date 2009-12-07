@@ -1,7 +1,7 @@
 -- @+leo-ver=4-thin
 -- @+node:gcross.20091204093401.2930:@thin QuantumEquationChecker.cabal
 -- @@language Haskell
-Name:           QuantumEquationChecker
+Name:           QuantumOperatorEqualityChecker
 Version:        0.1
 Cabal-Version:  >= 1.6
 Build-Type:     Custom

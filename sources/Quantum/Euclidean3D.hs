@@ -25,7 +25,7 @@ import Quantum.Function.Transformers
 -- @+others
 -- @+node:gcross.20091204093401.3465:Instances
 -- @+node:gcross.20091204093401.3469:Projectable (,,) XYZ
-instance Projectable ThreeDimensions XYZ where
+instance Projectable (ThreeDimensions result) XYZ result where
     project X (value,_,_) = value
     project Y (_,value,_) = value
     project Z (_,_,value) = value
@@ -35,14 +35,13 @@ instance Projectable ThreeDimensions XYZ where
 -- @+node:gcross.20091204093401.3476:XYZ
 data XYZ = X | Y | Z deriving (Eq,Show,Enum,Bounded)
 -- @-node:gcross.20091204093401.3476:XYZ
--- @+node:gcross.20091204093401.3485:ThreeDimensions
-type ThreeDimensions = (Complex Double,Complex Double,Complex Double)
--- @nonl
--- @-node:gcross.20091204093401.3485:ThreeDimensions
+-- @+node:gcross.20091206113753.1497:ThreeDimensions
+type ThreeDimensions result = (result,result,result)
+-- @-node:gcross.20091206113753.1497:ThreeDimensions
 -- @-node:gcross.20091204093401.3475:Types
 -- @+node:gcross.20091204093401.3477:Operators
 -- @+node:gcross.20091204093401.3478:r_
-r_ :: XYZ -> FunctionTransformer ThreeDimensions XYZ
+r_ :: Floating result => XYZ -> FunctionTransformer (ThreeDimensions result) XYZ result
 r_ x = (Projector x :*:)
 
 r_x = r_ X
@@ -51,7 +50,8 @@ r_z = r_ Z
 
 -- @-node:gcross.20091204093401.3478:r_
 -- @+node:gcross.20091204093401.3479:p_
-p_ :: XYZ -> FunctionTransformer ThreeDimensions XYZ
+p_ :: (Floating a, RealFloat a) =>
+      XYZ -> FunctionTransformer (ThreeDimensions (Complex a)) XYZ (Complex a)
 p_ j = (-i) *| d j
 
 p_x = p_ X

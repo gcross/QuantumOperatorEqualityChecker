@@ -23,19 +23,19 @@ import Data.Complex
 -- @+others
 -- @+node:gcross.20091204093401.3506:Values
 -- @+node:gcross.20091204093401.3507:i
-i :: Complex Double
-i = 0 :+ 1
+i :: (Floating a, RealFloat a) => Complex a
+i = (fromIntegral 0) :+ (fromIntegral 1)
 -- @-node:gcross.20091204093401.3507:i
 -- @-node:gcross.20091204093401.3506:Values
 -- @+node:gcross.20091204093401.1598:Classes
 -- @+node:gcross.20091204093401.1600:Projectable
-class Eq index => Projectable domain index where
-    project :: index -> domain -> Complex Double
+class Eq index => Projectable domain index a where
+    project :: index -> domain -> a
 -- @-node:gcross.20091204093401.1600:Projectable
 -- @-node:gcross.20091204093401.1598:Classes
 -- @+node:gcross.20091204093401.2964:Instances
 -- @+node:gcross.20091204093401.2965:Projectable (Complex Double) ()
-instance Projectable (Complex Double) () where
+instance Projectable a () a where
     project () = id
 -- @-node:gcross.20091204093401.2965:Projectable (Complex Double) ()
 -- @-node:gcross.20091204093401.2964:Instances
@@ -43,12 +43,15 @@ instance Projectable (Complex Double) () where
 -- @+node:gcross.20091204093401.1599:Function
 infixl 7 :*:
 infixl 6 :+:, :-:
-data Projectable domain index => Function domain index =
-    Constant (Complex Double)
+data (Floating result, Projectable domain index result) =>
+     Function domain index result =
+    Constant result
   | Projector index
-  | (Function domain index) :+: (Function domain index)
-  | (Function domain index) :-: (Function domain index)
-  | (Function domain index) :*: (Function domain index)
+  | (Function domain index result) :+: (Function domain index result)
+  | (Function domain index result) :-: (Function domain index result)
+  | (Function domain index result) :*: (Function domain index result)
+  | Sin (Function domain index result)
+  | Cos (Function domain index result)
   deriving (Eq,Show)
 -- @-node:gcross.20091204093401.1599:Function
 -- @-node:gcross.20091204093401.1596:Types
@@ -56,14 +59,16 @@ data Projectable domain index => Function domain index =
 -- @+node:gcross.20091204093401.3578:($>)
 infixl 5 $>
 
-($>) :: Projectable domain index =>
-        Function domain index ->
-        domain -> Complex Double
+($>) :: (Floating result, Projectable domain index result) =>
+        Function domain index result ->
+        domain -> result
 ($>) (Constant value) = const value
 ($>) (Projector index) = project index
 ($>) (f :+: g) = (f $>) <^(+)^> (g $>)
 ($>) (f :-: g) = (f $>) <^(-)^> (g $>)
 ($>) (f :*: g) = (f $>) <^(*)^> (g $>)
+($>) (Sin f) = sin . (f $>)
+($>) (Cos f) = cos . (f $>)
 -- @-node:gcross.20091204093401.3578:($>)
 -- @-node:gcross.20091204093401.3576:Functions
 -- @-others
