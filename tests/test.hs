@@ -148,7 +148,8 @@ main = defaultMain
             -- @-node:gcross.20091204093401.3516:[p_i,p_j] == 0
             -- @+node:gcross.20091204093401.3517:[r_i,p_j] == 0
             ,testProperty "[r_j,p_j] == i" $
-                \j f v@(x,y,z) -> _3dt (r_ j . p_ j) f $> v ~= ((p_ j . r_ j) |+| i *| id) f $> v
+                \j f v@(x,y,z) -> _3dt (r_ j ~~ p_ j) f $> v ~= i * (f $> v)
+
             -- @-node:gcross.20091204093401.3517:[r_i,p_j] == 0
             -- @-others
             ]

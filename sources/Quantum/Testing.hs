@@ -82,7 +82,7 @@ instance Arbitrary XYZ where
 -- @-node:gcross.20091206183506.1344:XYZ
 -- @+node:gcross.20091204093401.3616:Complex Double
 instance (Arbitrary a, RealFloat a) => Arbitrary (Complex a) where
-    arbitrary = liftM (:+ 0) arbitrary
+    arbitrary = liftM (:+ 0) $ (resize 1) arbitrary
 -- @-node:gcross.20091204093401.3616:Complex Double
 -- @+node:gcross.20091204093401.3617:Function
 instance (Floating result
@@ -106,8 +106,8 @@ instance (Floating result
                 [elements [(:+:),(:-:),(:*:)]
                     >>= \constructor ->
                         liftM2 constructor 
-                            (resize (size `div` 2) arbitrary)
-                            (resize (size `div` 2) arbitrary)
+                            (resize (size `div` 3) arbitrary)
+                            (resize (size `div` 3) arbitrary)
                 ]
 -- @-node:gcross.20091204093401.3617:Function
 -- @-node:gcross.20091204093401.3615:Generators
