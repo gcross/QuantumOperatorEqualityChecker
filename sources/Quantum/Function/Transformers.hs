@@ -90,6 +90,18 @@ infixl 6 |-|
          FunctionTransformer domain index a
 (|-|) = liftA2 (:-:)
 -- @-node:gcross.20091204093401.3591:|-|
+-- @+node:gcross.20091207125922.1336:osum
+osum :: (Floating a, Projectable domain index a) =>
+         [FunctionTransformer domain index a] ->
+         FunctionTransformer domain index a
+osum = foldl1 (|+|)
+-- @-node:gcross.20091207125922.1336:osum
+-- @+node:gcross.20091207125922.1338:negosum
+negosum :: (Floating a, Projectable domain index a) =>
+         [FunctionTransformer domain index a] ->
+         FunctionTransformer domain index a
+negosum = ((-1) *|) . osum
+-- @-node:gcross.20091207125922.1338:negosum
 -- @-node:gcross.20091204093401.3571:Functions
 -- @-others
 -- @-node:gcross.20091204093401.3565:@thin Transformers.hs
